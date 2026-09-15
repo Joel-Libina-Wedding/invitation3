@@ -11,12 +11,22 @@
   <link rel="stylesheet" href="style.css" />
 </head>
 <body class="invitation-page">
+  <audio id="weddingAudio" src="assets/music/wedding-music.mp3" preload="auto" loop></audio>
+
   <header class="hero" id="home">
-    <div class="hero-overlay"></div>
-    <div class="top-controls">
-      <button class="icon-btn" type="button" aria-label="Toggle music" id="musicToggle">♪</button>
-      <button class="menu-btn" type="button" aria-label="Menu">☰</button>
+    <div class="hero-slides" aria-hidden="true">
+      <div class="hero-slide active" data-src="assets/images/hero-1.jpg"></div>
+      <div class="hero-slide" data-src="assets/images/hero-2.jpg"></div>
+      <div class="hero-slide" data-src="assets/images/hero-3.jpg"></div>
     </div>
+    <div class="hero-overlay"></div>
+
+    <div class="top-controls">
+      <button class="icon-btn" type="button" aria-label="Play wedding music" id="musicToggle">♪</button>
+    </div>
+
+    <button class="hero-arrow hero-arrow-left" type="button" id="heroPrev" aria-label="Previous photo">‹</button>
+    <button class="hero-arrow hero-arrow-right" type="button" id="heroNext" aria-label="Next photo">›</button>
 
     <div class="hero-content">
       <p class="hero-kicker">WE'RE GETTING MARRIED</p>
@@ -111,7 +121,7 @@
           <p class="event-time">11:30 AM IST</p>
           <p class="event-location">
             St. Thomas Marthoma Church Auditorium<br>
-            Kavungumpazaya, Puramattom,<br>
+            Kavungumprayar, Puramattom,<br>
             Kerala, India
           </p>
           <a class="location-button" href="https://www.google.com/maps/place/St.+Thomas+Marthoma+Church,+Kavungumprayar/@9.3947287,76.6546238,17z/data=!3m1!4b1!4m6!3m5!1s0x3b063b43f0538349:0x31ac1e2afd8a3daf!8m2!3d9.3947287!4d76.6572041!16s%2Fg%2F1yg6d446z?entry=ttu&amp;g_ep=EgoyMDI2MDgwNS4xIKXMDSoASAFQAw%3D%3D" target="_blank" rel="noopener noreferrer">VIEW LOCATION</a>
@@ -139,6 +149,8 @@
           <a class="location-button" href="https://www.google.com/maps/place/Morning+Star+Convention+Center,+Elamanoor/@34.2028252,-93.0388842,7z/data=!4m6!3m5!1s0x3b0612a3592bf1c3:0xaee73cf59d8015a6!8m2!3d9.1338875!4d76.8086252!16s%2Fg%2F11cnddn0tt?entry=ttu&amp;g_ep=EgoyMDI2MDYxMC4wIKXMDSoASAFQAw%3D%3D" target="_blank" rel="noopener noreferrer">VIEW LOCATION</a>
         </article>
       </div>
+
+      <button class="calendar-button" type="button" id="addCalendar">＋ ADD EVENTS TO CALENDAR</button>
     </section>
 
     <section class="actions-section" id="actions">
@@ -173,7 +185,9 @@
         <p>“What God has joined together, let no one separate. Let all that you do be done in love.”</p>
       </blockquote>
 
-      <div class="guest-messages" id="guestMessages" aria-live="polite"></div>
+      <div class="guest-messages" id="guestMessages" aria-live="polite">
+        <p class="empty-greetings">Loading greetings…</p>
+      </div>
       <button class="secondary-button" type="button" id="openGreetings">Send Your Greetings</button>
     </section>
 
@@ -196,16 +210,21 @@
     </section>
   </main>
 
+  <footer class="wedding-footer">
+    <p class="footer-names">Joel & Libina</p>
+    <p>03 · 01 · 2027</p>
+  </footer>
+
   <div class="modal" id="invitationCardModal" aria-hidden="true">
     <div class="modal-backdrop" data-close-invitation></div>
     <div class="invitation-image-modal" role="dialog" aria-modal="true" aria-label="Wedding invitation card">
-      <button class="modal-close invitation-modal-close" type="button" aria-label="Close invitation" data-close-invitation>×</button>
+      <button class="modal-close invitation-modal-close" type="button" data-close-invitation aria-label="Close invitation card">×</button>
       <div class="invitation-image-wrap">
-        <img src="assets/images/invitation-card.jpg" alt="Joel and Libina wedding invitation card" id="invitationCardImage">
+        <img id="invitationCardImage" src="assets/images/invitation-card.jpg" alt="Joel and Libina wedding invitation card">
         <div class="invitation-image-placeholder" id="invitationCardPlaceholder">
-          <p class="eyebrow rose">INVITATION CARD</p>
-          <h2>Joel &amp; Libina</h2>
-          <p>Upload your invitation image as <strong>assets/images/invitation-card.jpg</strong>.</p>
+          <p class="eyebrow rose">INVITATION</p>
+          <h2>Joel & Libina</h2>
+          <p>Upload <strong>assets/images/invitation-card.jpg</strong> and your invitation card will appear here.</p>
         </div>
       </div>
     </div>
@@ -214,25 +233,68 @@
   <div class="modal" id="greetingsModal" aria-hidden="true">
     <div class="modal-backdrop" data-close-modal></div>
     <div class="modal-card" role="dialog" aria-modal="true" aria-labelledby="greetingTitle">
-      <button class="modal-close" type="button" aria-label="Close" data-close-modal>×</button>
+      <button class="modal-close" type="button" data-close-modal aria-label="Close">×</button>
       <p class="eyebrow rose">LOVE & BLESSINGS</p>
-      <h2 id="greetingTitle">Send Greetings</h2>
+      <h2 id="greetingTitle">Send a Greeting</h2>
       <form id="greetingForm">
         <label>
           Your name
-          <input type="text" id="guestName" maxlength="50" required placeholder="Your name">
+          <input type="text" id="guestName" maxlength="60" required placeholder="Your name">
         </label>
         <label>
           Your message
-          <textarea id="guestMessage" maxlength="300" rows="5" required placeholder="Write your blessing or message"></textarea>
+          <textarea id="guestMessage" maxlength="500" rows="5" required placeholder="Write your blessing or message"></textarea>
         </label>
-        <button class="secondary-button full-width" type="submit">Post Greeting</button>
+        <button class="secondary-button full-width" type="submit" id="greetingSubmit">Post Greeting</button>
       </form>
+    </div>
+  </div>
+
+  <div class="modal" id="rsvpModal" aria-hidden="true">
+    <div class="modal-backdrop" data-close-rsvp></div>
+    <div class="modal-card" role="dialog" aria-modal="true" aria-labelledby="rsvpTitle">
+      <button class="modal-close" type="button" data-close-rsvp aria-label="Close">×</button>
+      <p class="eyebrow rose">3 JANUARY 2027</p>
+      <h2 id="rsvpTitle">RSVP</h2>
+      <form id="rsvpForm">
+        <label>
+          Your name
+          <input type="text" id="rsvpName" maxlength="80" required placeholder="Your name">
+        </label>
+        <label>
+          Will you be attending?
+          <select id="rsvpAttendance" required>
+            <option value="">Select an option</option>
+            <option value="yes">Yes, I’ll be there</option>
+            <option value="no">Sorry, I can’t make it</option>
+          </select>
+        </label>
+        <label>
+          Number attending
+          <input type="number" id="rsvpGuestCount" min="0" max="10" value="1" required>
+        </label>
+        <label>
+          Message or note <span class="optional-text">(optional)</span>
+          <textarea id="rsvpMessage" maxlength="500" rows="4" placeholder="Anything you'd like us to know"></textarea>
+        </label>
+        <button class="secondary-button full-width" type="submit" id="rsvpSubmit">Submit RSVP</button>
+      </form>
+    </div>
+  </div>
+
+  <div class="modal gallery-lightbox" id="galleryLightbox" aria-hidden="true">
+    <div class="modal-backdrop" data-close-gallery></div>
+    <div class="lightbox-content" role="dialog" aria-modal="true" aria-label="Gallery photo viewer">
+      <button class="lightbox-close" type="button" data-close-gallery aria-label="Close gallery">×</button>
+      <button class="lightbox-arrow lightbox-prev" type="button" id="galleryPrev" aria-label="Previous photo">‹</button>
+      <img id="lightboxImage" src="" alt="Wedding gallery photo">
+      <button class="lightbox-arrow lightbox-next" type="button" id="galleryNext" aria-label="Next photo">›</button>
+      <p class="lightbox-counter" id="lightboxCounter"></p>
     </div>
   </div>
 
   <div class="toast" id="toast" role="status" aria-live="polite"></div>
 
-  <script src="script.js"></script>
+  <script type="module" src="script.js"></script>
 </body>
 </html>

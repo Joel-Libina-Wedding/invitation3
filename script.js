@@ -1,3 +1,21 @@
+import { initializeApp } from "https://www.gstatic.com/firebasejs/12.19.0/firebase-app.js";
+
+import {
+  getFirestore,
+  collection,
+  addDoc,
+  onSnapshot,
+  query,
+  orderBy,
+  limit,
+  serverTimestamp
+} from "https://www.gstatic.com/firebasejs/12.19.0/firebase-firestore.js";
+
+
+// ======================================================
+// FIREBASE
+// ======================================================
+
 const firebaseConfig = {
   apiKey: "AIzaSyC8XupQpKTtgQcz6pnCReJiZutlgw62yvk",
   authDomain: "joel-libina-wedding-52cf7.firebaseapp.com",
@@ -7,51 +25,63 @@ const firebaseConfig = {
   appId: "1:630651037453:web:0fb82dd7317e52af05f244"
 };
 
-import {
-  initializeApp
-} from "https://www.gstatic.com/firebasejs/12.2.1/firebase-app.js";
-
-import {
-  getFirestore,
-  collection,
-  addDoc,
-  onSnapshot,
-  query,
-  orderBy,
-  serverTimestamp
-} from "https://www.gstatic.com/firebasejs/12.2.1/firebase-firestore.js";
-
 const app = initializeApp(firebaseConfig);
 const db = getFirestore(app);
 
 
-// ===============================
+// ======================================================
 // COUNTDOWN
-// ===============================
+// ======================================================
 
 const weddingDate =
   new Date("2027-01-03T11:00:00+05:30").getTime();
 
 function updateCountdown() {
-  const daysEl = document.getElementById("days");
 
-  if (!daysEl) return;
+  const daysEl =
+    document.getElementById("days");
 
-  let distance = weddingDate - Date.now();
+  const hoursEl =
+    document.getElementById("hours");
 
-  if (distance < 0) distance = 0;
+  const minutesEl =
+    document.getElementById("minutes");
+
+  const secondsEl =
+    document.getElementById("seconds");
+
+  if (
+    !daysEl ||
+    !hoursEl ||
+    !minutesEl ||
+    !secondsEl
+  ) {
+    return;
+  }
+
+
+  let distance =
+    weddingDate - Date.now();
+
+
+  if (distance < 0) {
+    distance = 0;
+  }
+
 
   const days =
-    Math.floor(distance / (1000 * 60 * 60 * 24));
+    Math.floor(
+      distance / 86400000
+    );
 
   const hours =
     Math.floor(
-      (distance / (1000 * 60 * 60)) % 24
+      (distance / 3600000) % 24
     );
 
   const minutes =
     Math.floor(
-      (distance / (1000 * 60)) % 60
+      (distance / 60000) % 60
     );
 
   const seconds =
@@ -59,297 +89,526 @@ function updateCountdown() {
       (distance / 1000) % 60
     );
 
-  daysEl.textContent = days;
 
-  document.getElementById("hours").textContent =
+  daysEl.textContent =
+    days;
+
+  hoursEl.textContent =
     String(hours).padStart(2, "0");
 
-  document.getElementById("minutes").textContent =
+  minutesEl.textContent =
     String(minutes).padStart(2, "0");
 
-  document.getElementById("seconds").textContent =
+  secondsEl.textContent =
     String(seconds).padStart(2, "0");
 }
 
+
 updateCountdown();
 
-setInterval(updateCountdown, 1000);
+setInterval(
+  updateCountdown,
+  1000
+);
 
 
-// ===============================
+// ======================================================
 // HERO SLIDESHOW
-// ===============================
+// ======================================================
 
 const heroSlides = [
-  "assets/images/hero-1.jpg",
-  "assets/images/hero-2.jpg",
-  "assets/images/hero-3.jpg"
+  ...document.querySelectorAll(
+    ".hero-slide"
+  )
 ];
 
-let heroIndex = 0;
-let heroTimer = null;
-
-const heroImage =
-  document.getElementById("heroSlideshowImage");
-
 const heroPrev =
-  document.getElementById("heroPrev");
+  document.getElementById(
+    "heroPrev"
+  );
 
 const heroNext =
-  document.getElementById("heroNext");
+  document.getElementById(
+    "heroNext"
+  );
+
+let heroIndex = 0;
+let heroTimer;
+
+
+// Load every image from data-src
+heroSlides.forEach(
+  (slide) => {
+
+    const src =
+      slide.dataset.src;
+
+    if (!src) {
+      return;
+    }
+
+
+    const preloader =
+      new Image();
+
+
+    preloader.onload =
+      () => {
+
+        slide.style.backgroundImage =
+          `url("${src}")`;
+
+      };
+
+
+    preloader.onerror =
+      () => {
+
+        console.error(
+          "Unable to load hero image:",
+          src
+        );
+
+        slide.style.backgroundImage =
+          'url("assets/images/couple.jpg")';
+
+      };
+
+
+    preloader.src =
+      src;
+
+  }
+);
+
 
 function showHeroSlide(index) {
-  if (!heroImage) return;
+
+  if (!heroSlides.length) {
+    return;
+  }
+
 
   heroIndex =
-    (index + heroSlides.length) %
+    (
+      index +
+      heroSlides.length
+    ) %
     heroSlides.length;
 
-  heroImage.classList.add("hero-fade-out");
 
-  setTimeout(() => {
-    heroImage.src =
-      heroSlides[heroIndex];
+  heroSlides.forEach(
+    (
+      slide,
+      slideIndex
+    ) => {
 
-    heroImage.classList.remove(
-      "hero-fade-out"
-    );
-  }, 250);
+      slide.classList.toggle(
+        "active",
+        slideIndex === heroIndex
+      );
+
+    }
+  );
+
 }
 
-function nextHero() {
-  showHeroSlide(heroIndex + 1);
+
+function nextHeroSlide() {
+
+  showHeroSlide(
+    heroIndex + 1
+  );
+
 }
 
-function previousHero() {
-  showHeroSlide(heroIndex - 1);
+
+function previousHeroSlide() {
+
+  showHeroSlide(
+    heroIndex - 1
+  );
+
 }
+
 
 function resetHeroTimer() {
-  clearInterval(heroTimer);
+
+  clearInterval(
+    heroTimer
+  );
+
 
   heroTimer =
-    setInterval(nextHero, 6000);
+    setInterval(
+      nextHeroSlide,
+      6000
+    );
+
 }
 
+
+// Force first image active
+showHeroSlide(0);
+
+
+// Previous button
 heroPrev?.addEventListener(
   "click",
   () => {
-    previousHero();
+
+    previousHeroSlide();
+
     resetHeroTimer();
+
   }
 );
 
+
+// Next button
 heroNext?.addEventListener(
   "click",
   () => {
-    nextHero();
+
+    nextHeroSlide();
+
     resetHeroTimer();
+
   }
 );
 
-if (heroImage) {
-  heroImage.onerror = () => {
-    heroImage.onerror = null;
 
-    heroImage.src =
-      "assets/images/couple.jpg";
-  };
-
-  showHeroSlide(0);
-
-  resetHeroTimer();
-}
+// Start automatic slideshow
+resetHeroTimer();
 
 
-// ===============================
-// MUSIC
-// ===============================
+// ======================================================
+// WEDDING MUSIC
+// ======================================================
 
-const weddingMusic =
-  document.getElementById("weddingMusic");
+const weddingAudio =
+  document.getElementById(
+    "weddingAudio"
+  );
 
 const musicToggle =
-  document.getElementById("musicToggle");
+  document.getElementById(
+    "musicToggle"
+  );
 
-let musicPlaying = false;
 
-function updateMusicButton() {
-  if (!musicToggle) return;
+function setMusicButton(
+  isPlaying
+) {
+
+  if (!musicToggle) {
+    return;
+  }
+
 
   musicToggle.textContent =
-    musicPlaying ? "❚❚" : "♪";
+    isPlaying
+      ? "❚❚"
+      : "♪";
+
 
   musicToggle.setAttribute(
     "aria-label",
-    musicPlaying
-      ? "Pause music"
-      : "Play music"
+    isPlaying
+      ? "Pause wedding music"
+      : "Play wedding music"
   );
+
+
+  musicToggle.classList.toggle(
+    "playing",
+    isPlaying
+  );
+
 }
 
-async function startMusic() {
-  if (!weddingMusic) return;
+
+async function tryPlayMusic() {
+
+  if (!weddingAudio) {
+    return;
+  }
+
 
   try {
-    await weddingMusic.play();
 
-    musicPlaying = true;
+    await weddingAudio.play();
 
-    updateMusicButton();
+    setMusicButton(
+      true
+    );
+
   } catch {
-    musicPlaying = false;
 
-    updateMusicButton();
+    // Most mobile browsers block autoplay.
+    // The music button remains available.
+    setMusicButton(
+      false
+    );
+
   }
+
 }
 
-function pauseMusic() {
-  if (!weddingMusic) return;
 
-  weddingMusic.pause();
+// Try autoplay
+window.addEventListener(
+  "load",
+  tryPlayMusic,
+  {
+    once: true
+  }
+);
 
-  musicPlaying = false;
 
-  updateMusicButton();
-}
-
+// Play / pause
 musicToggle?.addEventListener(
   "click",
   async () => {
-    if (!weddingMusic) return;
 
-    if (weddingMusic.paused) {
-      await startMusic();
-    } else {
-      pauseMusic();
+    if (!weddingAudio) {
+      return;
     }
+
+
+    if (
+      weddingAudio.paused
+    ) {
+
+      try {
+
+        await weddingAudio.play();
+
+        setMusicButton(
+          true
+        );
+
+      } catch (
+        error
+      ) {
+
+        console.error(
+          "Music playback failed:",
+          error
+        );
+
+        showToast(
+          "Tap again to start the music."
+        );
+
+      }
+
+    } else {
+
+      weddingAudio.pause();
+
+      setMusicButton(
+        false
+      );
+
+    }
+
   }
 );
 
-weddingMusic?.addEventListener(
+
+weddingAudio?.addEventListener(
   "play",
   () => {
-    musicPlaying = true;
-    updateMusicButton();
+
+    setMusicButton(
+      true
+    );
+
   }
 );
 
-weddingMusic?.addEventListener(
+
+weddingAudio?.addEventListener(
   "pause",
   () => {
-    musicPlaying = false;
-    updateMusicButton();
-  }
-);
 
-window.addEventListener(
-  "load",
-  async () => {
-    await startMusic();
+    setMusicButton(
+      false
+    );
+
   }
 );
 
 
-// ===============================
-// OUR STORY READ MORE
-// ===============================
+// ======================================================
+// OUR STORY - READ MORE
+// ======================================================
 
 const storyReadMore =
-  document.getElementById("storyReadMore");
+  document.getElementById(
+    "storyReadMore"
+  );
 
 const storyMore =
-  document.getElementById("storyMore");
+  document.getElementById(
+    "storyMore"
+  );
+
 
 storyReadMore?.addEventListener(
   "click",
   () => {
+
+    if (!storyMore) {
+      return;
+    }
+
+
     const isOpen =
       storyReadMore.getAttribute(
         "aria-expanded"
       ) === "true";
 
+
     storyReadMore.setAttribute(
       "aria-expanded",
-      String(!isOpen)
+      String(
+        !isOpen
+      )
     );
 
-    if (storyMore) {
-      storyMore.hidden =
-        isOpen;
-    }
+
+    storyMore.hidden =
+      isOpen;
+
 
     storyReadMore.textContent =
       isOpen
         ? "Read More"
         : "Read Less";
+
   }
 );
 
 
-// ===============================
-// GENERAL MODALS
-// ===============================
-
-function openModal(element) {
-  if (!element) return;
-
-  element.classList.add("open");
-
-  element.setAttribute(
-    "aria-hidden",
-    "false"
-  );
-
-  document.body.classList.add(
-    "modal-open"
-  );
-}
-
-function closeModal(element) {
-  if (!element) return;
-
-  element.classList.remove("open");
-
-  element.setAttribute(
-    "aria-hidden",
-    "true"
-  );
-
-  document.body.classList.remove(
-    "modal-open"
-  );
-}
-
-
-// ===============================
+// ======================================================
 // TOAST
-// ===============================
+// ======================================================
 
 const toast =
-  document.getElementById("toast");
+  document.getElementById(
+    "toast"
+  );
 
-function showToast(message) {
-  if (!toast) return;
 
-  toast.textContent = message;
+function showToast(
+  message
+) {
 
-  toast.classList.add("show");
+  if (!toast) {
+    return;
+  }
+
+
+  toast.textContent =
+    message;
+
+
+  toast.classList.add(
+    "show"
+  );
+
 
   clearTimeout(
     showToast.timer
   );
 
+
   showToast.timer =
-    setTimeout(() => {
-      toast.classList.remove("show");
-    }, 2800);
+    setTimeout(
+      () => {
+
+        toast.classList.remove(
+          "show"
+        );
+
+      },
+      3000
+    );
+
 }
 
 
-// ===============================
-// INVITATION CARD POPUP
-// ===============================
+// ======================================================
+// MODAL HELPERS
+// ======================================================
+
+function openModal(
+  modal
+) {
+
+  if (!modal) {
+    return;
+  }
+
+
+  modal.classList.add(
+    "open"
+  );
+
+
+  modal.setAttribute(
+    "aria-hidden",
+    "false"
+  );
+
+
+  document.body.classList.add(
+    "modal-open"
+  );
+
+}
+
+
+function closeModal(
+  modal
+) {
+
+  if (!modal) {
+    return;
+  }
+
+
+  modal.classList.remove(
+    "open"
+  );
+
+
+  modal.setAttribute(
+    "aria-hidden",
+    "true"
+  );
+
+
+  if (
+    !document.querySelector(
+      ".modal.open"
+    )
+  ) {
+
+    document.body.classList.remove(
+      "modal-open"
+    );
+
+  }
+
+}
+
+
+// ======================================================
+// INVITATION CARD
+// ======================================================
 
 const invitationModal =
   document.getElementById(
@@ -366,57 +625,80 @@ const invitationCardPlaceholder =
     "invitationCardPlaceholder"
   );
 
-if (invitationCardImage) {
+
+if (
+  invitationCardImage
+) {
+
   invitationCardImage.addEventListener(
     "load",
     () => {
+
       invitationCardImage.style.display =
         "block";
+
 
       if (
         invitationCardPlaceholder
       ) {
+
         invitationCardPlaceholder.style.display =
           "none";
+
       }
+
     }
   );
+
 
   invitationCardImage.addEventListener(
     "error",
     () => {
+
       invitationCardImage.style.display =
         "none";
+
 
       if (
         invitationCardPlaceholder
       ) {
+
         invitationCardPlaceholder.style.display =
           "flex";
+
       }
+
     }
   );
+
 }
+
 
 document
   .querySelectorAll(
     "[data-close-invitation]"
   )
-  .forEach((element) => {
-    element.addEventListener(
-      "click",
-      () => {
-        closeModal(
-          invitationModal
-        );
-      }
-    );
-  });
+  .forEach(
+    (element) => {
+
+      element.addEventListener(
+        "click",
+        () => {
+
+          closeModal(
+            invitationModal
+          );
+
+        }
+      );
+
+    }
+  );
 
 
-// ===============================
+// ======================================================
 // FIREBASE GREETINGS
-// ===============================
+// ======================================================
 
 const greetingsModal =
   document.getElementById(
@@ -438,80 +720,251 @@ const openGreetings =
     "openGreetings"
   );
 
+const greetingSubmit =
+  document.getElementById(
+    "greetingSubmit"
+  );
+
+
+function renderGreetingDocs(
+  docs
+) {
+
+  if (!guestMessages) {
+    return;
+  }
+
+
+  guestMessages.innerHTML =
+    "";
+
+
+  if (!docs.length) {
+
+    guestMessages.innerHTML =
+      '<p class="empty-greetings">Be the first to leave Joel & Libina a message.</p>';
+
+    return;
+
+  }
+
+
+  docs.forEach(
+    (docSnap) => {
+
+      const item =
+        docSnap.data();
+
+
+      const card =
+        document.createElement(
+          "article"
+        );
+
+      card.className =
+        "guest-message-card";
+
+
+      const message =
+        document.createElement(
+          "p"
+        );
+
+      message.textContent =
+        item.message || "";
+
+
+      const name =
+        document.createElement(
+          "strong"
+        );
+
+      name.textContent =
+        `— ${item.name || "Guest"}`;
+
+
+      card.append(
+        message,
+        name
+      );
+
+
+      guestMessages.appendChild(
+        card
+      );
+
+    }
+  );
+
+}
+
+
+if (
+  guestMessages
+) {
+
+  try {
+
+    const greetingsQuery =
+      query(
+        collection(
+          db,
+          "greetings"
+        ),
+        orderBy(
+          "createdAt",
+          "desc"
+        ),
+        limit(
+          50
+        )
+      );
+
+
+    onSnapshot(
+      greetingsQuery,
+      (
+        snapshot
+      ) => {
+
+        renderGreetingDocs(
+          snapshot.docs
+        );
+
+      },
+      (
+        error
+      ) => {
+
+        console.error(
+          "Greeting feed error:",
+          error
+        );
+
+
+        guestMessages.innerHTML =
+          '<p class="empty-greetings">Greetings are temporarily unavailable.</p>';
+
+      }
+    );
+
+  } catch (
+    error
+  ) {
+
+    console.error(
+      "Firebase greeting setup error:",
+      error
+    );
+
+  }
+
+}
+
+
 openGreetings?.addEventListener(
   "click",
   () => {
+
     openModal(
       greetingsModal
     );
 
-    setTimeout(() => {
-      document
-        .getElementById(
-          "guestName"
-        )
-        ?.focus();
-    }, 100);
+
+    setTimeout(
+      () => {
+
+        document
+          .getElementById(
+            "guestName"
+          )
+          ?.focus();
+
+      },
+      50
+    );
+
   }
 );
+
 
 document
   .querySelectorAll(
     "[data-close-modal]"
   )
-  .forEach((element) => {
-    element.addEventListener(
-      "click",
-      () => {
-        closeModal(
-          greetingsModal
-        );
-      }
-    );
-  });
+  .forEach(
+    (element) => {
+
+      element.addEventListener(
+        "click",
+        () => {
+
+          closeModal(
+            greetingsModal
+          );
+
+        }
+      );
+
+    }
+  );
+
 
 greetingForm?.addEventListener(
   "submit",
-  async (event) => {
+  async (
+    event
+  ) => {
+
     event.preventDefault();
 
-    const submitButton =
-      greetingForm.querySelector(
-        'button[type="submit"]'
+
+    const guestNameInput =
+      document.getElementById(
+        "guestName"
       );
 
+    const guestMessageInput =
+      document.getElementById(
+        "guestMessage"
+      );
+
+
     const name =
-      document
-        .getElementById(
-          "guestName"
-        )
-        ?.value
-        .trim();
+      guestNameInput?.value.trim();
 
     const message =
-      document
-        .getElementById(
-          "guestMessage"
-        )
-        ?.value
-        .trim();
+      guestMessageInput?.value.trim();
 
-    if (!name || !message) {
+
+    if (
+      !name ||
+      !message
+    ) {
+
       showToast(
         "Please enter your name and message."
       );
 
       return;
+
     }
 
-    try {
-      if (submitButton) {
-        submitButton.disabled =
-          true;
 
-        submitButton.textContent =
-          "Sending...";
-      }
+    if (
+      greetingSubmit
+    ) {
+
+      greetingSubmit.disabled =
+        true;
+
+      greetingSubmit.textContent =
+        "Posting…";
+
+    }
+
+
+    try {
 
       await addDoc(
         collection(
@@ -526,130 +979,70 @@ greetingForm?.addEventListener(
         }
       );
 
+
       greetingForm.reset();
+
 
       closeModal(
         greetingsModal
       );
 
-      showToast(
-        "Your greeting has been added."
-      );
 
       document
         .getElementById(
           "blessings"
         )
-        ?.scrollIntoView({
-          behavior: "smooth",
-          block: "start"
-        });
-    } catch (error) {
+        ?.scrollIntoView(
+          {
+            behavior:
+              "smooth",
+            block:
+              "start"
+          }
+        );
+
+
+      showToast(
+        "Your greeting has been added."
+      );
+
+    } catch (
+      error
+    ) {
+
       console.error(
-        "Greeting error:",
+        "Greeting submit error:",
         error
       );
 
+
       showToast(
-        "Could not send your greeting. Please try again."
+        "Could not post your greeting. Please try again."
       );
+
     } finally {
-      if (submitButton) {
-        submitButton.disabled =
+
+      if (
+        greetingSubmit
+      ) {
+
+        greetingSubmit.disabled =
           false;
 
-        submitButton.textContent =
-          "Send Greeting";
+        greetingSubmit.textContent =
+          "Post Greeting";
+
       }
+
     }
+
   }
 );
 
-function renderGreetingCard(data) {
-  const card =
-    document.createElement(
-      "article"
-    );
 
-  card.className =
-    "guest-message-card";
-
-  const message =
-    document.createElement(
-      "p"
-    );
-
-  message.textContent =
-    data.message;
-
-  const name =
-    document.createElement(
-      "strong"
-    );
-
-  name.textContent =
-    `— ${data.name}`;
-
-  card.append(
-    message,
-    name
-  );
-
-  return card;
-}
-
-if (guestMessages) {
-  const greetingsQuery =
-    query(
-      collection(
-        db,
-        "greetings"
-      ),
-      orderBy(
-        "createdAt",
-        "desc"
-      )
-    );
-
-  onSnapshot(
-    greetingsQuery,
-    (snapshot) => {
-      guestMessages.innerHTML =
-        "";
-
-      if (snapshot.empty) {
-        guestMessages.innerHTML =
-          '<p class="empty-greetings">Be the first to leave Joel & Libina a message.</p>';
-
-        return;
-      }
-
-      snapshot.forEach(
-        (documentSnapshot) => {
-          guestMessages.appendChild(
-            renderGreetingCard(
-              documentSnapshot.data()
-            )
-          );
-        }
-      );
-    },
-    (error) => {
-      console.error(
-        "Greeting loading error:",
-        error
-      );
-
-      guestMessages.innerHTML =
-        '<p class="empty-greetings">Greetings could not be loaded right now.</p>';
-    }
-  );
-}
-
-
-// ===============================
+// ======================================================
 // FIREBASE RSVP
-// ===============================
+// ======================================================
 
 const rsvpModal =
   document.getElementById(
@@ -661,82 +1054,186 @@ const rsvpForm =
     "rsvpForm"
   );
 
-document
-  .querySelectorAll(
-    "[data-close-rsvp]"
-  )
-  .forEach((element) => {
-    element.addEventListener(
-      "click",
-      () => {
-        closeModal(
-          rsvpModal
-        );
-      }
-    );
-  });
+const rsvpAttendance =
+  document.getElementById(
+    "rsvpAttendance"
+  );
 
-rsvpForm?.addEventListener(
-  "submit",
-  async (event) => {
-    event.preventDefault();
+const rsvpGuestCount =
+  document.getElementById(
+    "rsvpGuestCount"
+  );
 
-    const submitButton =
-      rsvpForm.querySelector(
-        'button[type="submit"]'
-      );
+const rsvpSubmit =
+  document.getElementById(
+    "rsvpSubmit"
+  );
 
-    const name =
+
+function openRsvpModal() {
+
+  openModal(
+    rsvpModal
+  );
+
+
+  setTimeout(
+    () => {
+
       document
         .getElementById(
           "rsvpName"
         )
-        ?.value
-        .trim();
+        ?.focus();
 
-    const attendance =
-      document
-        .getElementById(
-          "rsvpAttendance"
-        )
-        ?.value;
+    },
+    50
+  );
 
-    const guestCount =
-      Number(
-        document
-          .getElementById(
-            "rsvpGuestCount"
-          )
-          ?.value || 0
+}
+
+
+document
+  .querySelectorAll(
+    "[data-close-rsvp]"
+  )
+  .forEach(
+    (element) => {
+
+      element.addEventListener(
+        "click",
+        () => {
+
+          closeModal(
+            rsvpModal
+          );
+
+        }
       );
 
-    const message =
-      document
-        .getElementById(
-          "rsvpMessage"
-        )
-        ?.value
-        .trim() || "";
+    }
+  );
+
+
+rsvpAttendance?.addEventListener(
+  "change",
+  () => {
 
     if (
-      !name ||
-      !attendance
+      !rsvpGuestCount
     ) {
-      showToast(
-        "Please complete the required RSVP details."
-      );
-
       return;
     }
 
-    try {
-      if (submitButton) {
-        submitButton.disabled =
-          true;
 
-        submitButton.textContent =
-          "Submitting...";
-      }
+    const attending =
+      rsvpAttendance.value ===
+      "yes";
+
+
+    if (
+      attending
+    ) {
+
+      rsvpGuestCount.disabled =
+        false;
+
+      rsvpGuestCount.value =
+        Math.max(
+          1,
+          Number(
+            rsvpGuestCount.value
+          ) || 1
+        );
+
+    } else {
+
+      rsvpGuestCount.value =
+        0;
+
+      rsvpGuestCount.disabled =
+        true;
+
+    }
+
+  }
+);
+
+
+rsvpForm?.addEventListener(
+  "submit",
+  async (
+    event
+  ) => {
+
+    event.preventDefault();
+
+
+    const rsvpNameInput =
+      document.getElementById(
+        "rsvpName"
+      );
+
+    const rsvpMessageInput =
+      document.getElementById(
+        "rsvpMessage"
+      );
+
+
+    const name =
+      rsvpNameInput?.value.trim();
+
+
+    const attendance =
+      rsvpAttendance?.value;
+
+
+    const guestCount =
+      attendance === "yes"
+        ? Number(
+            rsvpGuestCount?.value
+          )
+        : 0;
+
+
+    const message =
+      rsvpMessageInput?.value.trim() ||
+      "";
+
+
+    if (
+      !name ||
+      !attendance ||
+      !Number.isInteger(
+        guestCount
+      ) ||
+      guestCount < 0 ||
+      guestCount > 10
+    ) {
+
+      showToast(
+        "Please complete the RSVP form."
+      );
+
+      return;
+
+    }
+
+
+    if (
+      rsvpSubmit
+    ) {
+
+      rsvpSubmit.disabled =
+        true;
+
+      rsvpSubmit.textContent =
+        "Submitting…";
+
+    }
+
+
+    try {
 
       await addDoc(
         collection(
@@ -753,122 +1250,182 @@ rsvpForm?.addEventListener(
         }
       );
 
+
       rsvpForm.reset();
+
+
+      if (
+        rsvpGuestCount
+      ) {
+
+        rsvpGuestCount.disabled =
+          false;
+
+        rsvpGuestCount.value =
+          1;
+
+      }
+
 
       closeModal(
         rsvpModal
       );
 
+
       showToast(
-        "Thank you. Your RSVP has been submitted."
+        "Thank you — your RSVP was received."
       );
-    } catch (error) {
+
+    } catch (
+      error
+    ) {
+
       console.error(
-        "RSVP error:",
+        "RSVP submit error:",
         error
       );
+
 
       showToast(
         "Could not submit your RSVP. Please try again."
       );
+
     } finally {
-      if (submitButton) {
-        submitButton.disabled =
+
+      if (
+        rsvpSubmit
+      ) {
+
+        rsvpSubmit.disabled =
           false;
 
-        submitButton.textContent =
+        rsvpSubmit.textContent =
           "Submit RSVP";
+
       }
+
     }
+
   }
 );
 
 
-// ===============================
-// ACTION TILES
-// ===============================
+// ======================================================
+// ACTION BUTTONS
+// ======================================================
 
 document
   .querySelectorAll(
     ".action-tile"
   )
-  .forEach((button) => {
-    button.addEventListener(
-      "click",
-      () => {
-        const action =
-          button.dataset.action;
+  .forEach(
+    (
+      button
+    ) => {
 
-        if (
-          action ===
-          "invitation"
-        ) {
-          openModal(
-            invitationModal
-          );
+      button.addEventListener(
+        "click",
+        () => {
 
-          return;
+          const action =
+            button.dataset.action;
+
+
+          if (
+            action ===
+            "invitation"
+          ) {
+
+            openModal(
+              invitationModal
+            );
+
+            return;
+
+          }
+
+
+          if (
+            action ===
+            "greetings"
+          ) {
+
+            openModal(
+              greetingsModal
+            );
+
+
+            setTimeout(
+              () => {
+
+                document
+                  .getElementById(
+                    "guestName"
+                  )
+                  ?.focus();
+
+              },
+              50
+            );
+
+            return;
+
+          }
+
+
+          if (
+            action ===
+            "livestream"
+          ) {
+
+            showToast(
+              "Live streaming details will be added soon."
+            );
+
+            return;
+
+          }
+
+
+          if (
+            action ===
+            "rsvp"
+          ) {
+
+            openRsvpModal();
+
+          }
+
         }
+      );
 
-        if (
-          action ===
-          "greetings"
-        ) {
-          openModal(
-            greetingsModal
-          );
-
-          return;
-        }
-
-        if (
-          action ===
-          "livestream"
-        ) {
-          showToast(
-            "Live streaming details will be added soon."
-          );
-
-          return;
-        }
-
-        if (
-          action === "rsvp"
-        ) {
-          openModal(
-            rsvpModal
-          );
-        }
-      }
-    );
-  });
-
-
-// ===============================
-// GALLERY LIGHTBOX
-// ===============================
-
-const galleryImages = [
-  "assets/images/gallery-1.jpg",
-  "assets/images/gallery-2.jpg",
-  "assets/images/gallery-3.jpg",
-  "assets/images/gallery-4.jpg",
-  "assets/images/gallery-5.jpg",
-  "assets/images/gallery-6.jpg",
-  "assets/images/gallery-7.jpg",
-  "assets/images/gallery-8.jpg"
-];
-
-let galleryIndex = 0;
-
-const galleryModal =
-  document.getElementById(
-    "galleryModal"
+    }
   );
 
-const galleryLightboxImage =
+
+// ======================================================
+// GALLERY + LIGHTBOX
+// ======================================================
+
+const galleryItems = [
+  ...document.querySelectorAll(
+    ".gallery-item"
+  )
+];
+
+const lightbox =
   document.getElementById(
-    "galleryLightboxImage"
+    "galleryLightbox"
+  );
+
+const lightboxImage =
+  document.getElementById(
+    "lightboxImage"
+  );
+
+const lightboxCounter =
+  document.getElementById(
+    "lightboxCounter"
   );
 
 const galleryPrev =
@@ -881,226 +1438,416 @@ const galleryNext =
     "galleryNext"
   );
 
-function showGalleryImage(index) {
+let availableGalleryImages =
+  [];
+
+let galleryIndex = 0;
+let touchStartX = 0;
+
+
+function refreshGalleryImages() {
+
+  availableGalleryImages =
+    galleryItems
+      .filter(
+        (
+          item
+        ) =>
+          item.classList.contains(
+            "has-image"
+          )
+      )
+      .map(
+        (
+          item
+        ) =>
+          item.querySelector(
+            "img"
+          )
+      )
+      .filter(
+        Boolean
+      );
+
+}
+
+
+function showGalleryImage(
+  index
+) {
+
+  refreshGalleryImages();
+
+
   if (
-    !galleryLightboxImage
+    !availableGalleryImages.length ||
+    !lightboxImage
   ) {
     return;
   }
 
-  galleryIndex =
-    (index +
-      galleryImages.length) %
-    galleryImages.length;
 
-  galleryLightboxImage.src =
-    galleryImages[
+  galleryIndex =
+    (
+      index +
+      availableGalleryImages.length
+    ) %
+    availableGalleryImages.length;
+
+
+  const source =
+    availableGalleryImages[
       galleryIndex
     ];
+
+
+  lightboxImage.src =
+    source.src;
+
+
+  lightboxImage.alt =
+    source.alt;
+
+
+  if (
+    lightboxCounter
+  ) {
+
+    lightboxCounter.textContent =
+      `${galleryIndex + 1} / ${availableGalleryImages.length}`;
+
+  }
+
 }
 
-document
-  .querySelectorAll(
-    ".gallery-item"
-  )
-  .forEach(
-    (item, index) => {
-      const image =
-        item.querySelector(
-          "img"
+
+galleryItems.forEach(
+  (
+    item
+  ) => {
+
+    const img =
+      item.querySelector(
+        "img"
+      );
+
+
+    if (!img) {
+      return;
+    }
+
+
+    const markLoaded =
+      () => {
+
+        item.classList.add(
+          "has-image"
         );
 
-      image?.addEventListener(
+        refreshGalleryImages();
+
+      };
+
+
+    if (
+      img.complete &&
+      img.naturalWidth > 0
+    ) {
+
+      markLoaded();
+
+    } else {
+
+      img.addEventListener(
         "load",
-        () => {
-          item.classList.add(
-            "has-image"
-          );
-        }
+        markLoaded
       );
 
-      image?.addEventListener(
-        "error",
-        () => {
-          image.style.display =
-            "none";
-        }
-      );
-
-      item.addEventListener(
-        "click",
-        () => {
-          galleryIndex =
-            index;
-
-          showGalleryImage(
-            galleryIndex
-          );
-
-          openModal(
-            galleryModal
-          );
-        }
-      );
     }
-  );
+
+
+    img.addEventListener(
+      "error",
+      () => {
+
+        img.style.display =
+          "none";
+
+
+        item.classList.remove(
+          "has-image"
+        );
+
+
+        refreshGalleryImages();
+
+      }
+    );
+
+
+    item.addEventListener(
+      "click",
+      () => {
+
+        if (
+          !item.classList.contains(
+            "has-image"
+          )
+        ) {
+          return;
+        }
+
+
+        refreshGalleryImages();
+
+
+        const index =
+          availableGalleryImages.indexOf(
+            img
+          );
+
+
+        showGalleryImage(
+          index
+        );
+
+
+        openModal(
+          lightbox
+        );
+
+      }
+    );
+
+  }
+);
+
 
 galleryPrev?.addEventListener(
   "click",
   () => {
+
     showGalleryImage(
       galleryIndex - 1
     );
+
   }
 );
+
 
 galleryNext?.addEventListener(
   "click",
   () => {
+
     showGalleryImage(
       galleryIndex + 1
     );
+
   }
 );
+
 
 document
   .querySelectorAll(
     "[data-close-gallery]"
   )
-  .forEach((element) => {
-    element.addEventListener(
-      "click",
-      () => {
-        closeModal(
-          galleryModal
-        );
-      }
-    );
-  });
+  .forEach(
+    (
+      element
+    ) => {
 
-let touchStartX = 0;
+      element.addEventListener(
+        "click",
+        () => {
 
-galleryModal?.addEventListener(
+          closeModal(
+            lightbox
+          );
+
+        }
+      );
+
+    }
+  );
+
+
+lightboxImage?.addEventListener(
   "touchstart",
-  (event) => {
+  (
+    event
+  ) => {
+
     touchStartX =
       event.changedTouches[0]
         .screenX;
+
+  },
+  {
+    passive: true
   }
 );
 
-galleryModal?.addEventListener(
-  "touchend",
-  (event) => {
-    const touchEndX =
-      event.changedTouches[0]
-        .screenX;
 
-    const difference =
-      touchEndX -
+lightboxImage?.addEventListener(
+  "touchend",
+  (
+    event
+  ) => {
+
+    const delta =
+      event.changedTouches[0]
+        .screenX -
       touchStartX;
+
 
     if (
       Math.abs(
-        difference
-      ) < 50
+        delta
+      ) < 45
     ) {
       return;
     }
 
+
     if (
-      difference > 0
+      delta > 0
     ) {
+
       showGalleryImage(
         galleryIndex - 1
       );
+
     } else {
+
       showGalleryImage(
         galleryIndex + 1
       );
+
     }
+
+  },
+  {
+    passive: true
   }
 );
 
 
-// ===============================
-// ADD TO CALENDAR
-// ===============================
+// ======================================================
+// ADD EVENTS TO CALENDAR
+// ======================================================
 
-const addToCalendar =
+const addCalendar =
   document.getElementById(
-    "addToCalendar"
+    "addCalendar"
   );
 
-addToCalendar?.addEventListener(
+
+function downloadCalendarFile() {
+
+  const ics =
+`BEGIN:VCALENDAR
+VERSION:2.0
+PRODID:-//Joel and Libina Wedding//EN
+CALSCALE:GREGORIAN
+METHOD:PUBLISH
+BEGIN:VEVENT
+UID:engagement-20261231@joel-libina-wedding
+DTSTART:20261231T060000Z
+DTEND:20261231T080000Z
+SUMMARY:Joel & Libina - Engagement
+LOCATION:St. Thomas Marthoma Church Auditorium, Kavungumprayar, Puramattom, Kerala, India
+END:VEVENT
+BEGIN:VEVENT
+UID:wedding-20270103@joel-libina-wedding
+DTSTART:20270103T053000Z
+DTEND:20270103T073000Z
+SUMMARY:Joel & Libina - Wedding Ceremony
+LOCATION:Mar Lazarus Orthodox Valiyapally, Pathanapuram, Kerala, India
+END:VEVENT
+BEGIN:VEVENT
+UID:reception-20270103@joel-libina-wedding
+DTSTART:20270103T093000Z
+DTEND:20270103T123000Z
+SUMMARY:Joel & Libina - Wedding Reception
+LOCATION:Morning Star Convention Center, Elamanoor, Kerala, India
+END:VEVENT
+END:VCALENDAR`;
+
+
+  const blob =
+    new Blob(
+      [
+        ics.replace(
+          /\n/g,
+          "\r\n"
+        )
+      ],
+      {
+        type:
+          "text/calendar;charset=utf-8"
+      }
+    );
+
+
+  const url =
+    URL.createObjectURL(
+      blob
+    );
+
+
+  const link =
+    document.createElement(
+      "a"
+    );
+
+
+  link.href =
+    url;
+
+
+  link.download =
+    "joel-libina-wedding-events.ics";
+
+
+  document.body.appendChild(
+    link
+  );
+
+
+  link.click();
+
+
+  link.remove();
+
+
+  URL.revokeObjectURL(
+    url
+  );
+
+}
+
+
+addCalendar?.addEventListener(
   "click",
-  () => {
-    const calendarData = [
-      "BEGIN:VCALENDAR",
-      "VERSION:2.0",
-      "PRODID:-//Joel & Libina Wedding//EN",
-      "BEGIN:VEVENT",
-      "UID:joel-libina-wedding-2027",
-      "DTSTAMP:20260915T000000Z",
-      "DTSTART:20270103T053000Z",
-      "DTEND:20270103T073000Z",
-      "SUMMARY:Joel & Libina Wedding",
-      "LOCATION:Mar Lazarus Orthodox Valiyapally, Pathanapuram, Kerala",
-      "DESCRIPTION:Wedding of Joel Mathew Philip and Libina Mary Lalu.",
-      "END:VEVENT",
-      "END:VCALENDAR"
-    ].join("\r\n");
-
-    const blob =
-      new Blob(
-        [calendarData],
-        {
-          type:
-            "text/calendar;charset=utf-8"
-        }
-      );
-
-    const url =
-      URL.createObjectURL(
-        blob
-      );
-
-    const link =
-      document.createElement(
-        "a"
-      );
-
-    link.href = url;
-
-    link.download =
-      "joel-libina-wedding.ics";
-
-    document.body.appendChild(
-      link
-    );
-
-    link.click();
-
-    link.remove();
-
-    URL.revokeObjectURL(
-      url
-    );
-  }
+  downloadCalendarFile
 );
 
 
-// ===============================
+// ======================================================
 // KEYBOARD CONTROLS
-// ===============================
+// ======================================================
 
 document.addEventListener(
   "keydown",
-  (event) => {
+  (
+    event
+  ) => {
+
     if (
       event.key ===
       "Escape"
     ) {
+
       closeModal(
         greetingsModal
       );
@@ -1114,32 +1861,42 @@ document.addEventListener(
       );
 
       closeModal(
-        galleryModal
+        lightbox
       );
+
     }
 
+
     if (
-      galleryModal?.classList.contains(
+      lightbox?.classList.contains(
         "open"
       )
     ) {
+
       if (
         event.key ===
         "ArrowLeft"
       ) {
+
         showGalleryImage(
           galleryIndex - 1
         );
+
       }
+
 
       if (
         event.key ===
         "ArrowRight"
       ) {
+
         showGalleryImage(
           galleryIndex + 1
         );
+
       }
+
     }
+
   }
 );

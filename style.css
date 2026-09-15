@@ -271,3 +271,37 @@ a { color: inherit; }
   .hero { min-height: 92vh; background-position: center 29%; }
   .landing-card { padding-inline: 48px; }
 }
+
+/* ---------- Landing page viewport fill refinement ---------- */
+.landing-shell {
+  min-height: 100svh;
+  padding: 10px 16px 14px;
+  align-items: stretch;
+}
+
+.landing-card {
+  min-height: calc(100svh - 24px);
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  padding: 26px 30px 18px;
+}
+
+@media (max-width: 600px) {
+  .landing-shell {
+    min-height: 100svh;
+    padding: 8px 12px 10px;
+  }
+
+  .landing-card {
+    min-height: calc(100svh - 18px);
+    padding: 24px 20px 16px;
+  }
+
+  .save-title { margin-bottom: 10px; }
+  .title-divider { margin-top: 10px; }
+  .portrait-pair { margin: 6px 0 10px; }
+  .landing-names { margin-bottom: 10px; }
+  .event-copy { gap: 8px; margin-bottom: 12px; }
+  .card-footnote { margin-top: 8px; }
+}

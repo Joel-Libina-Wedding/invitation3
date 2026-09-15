@@ -25,9 +25,6 @@
       <button class="icon-btn" type="button" aria-label="Play wedding music" id="musicToggle">♪</button>
     </div>
 
-    <button class="hero-arrow hero-arrow-left" type="button" id="heroPrev" aria-label="Previous photo">‹</button>
-    <button class="hero-arrow hero-arrow-right" type="button" id="heroNext" aria-label="Next photo">›</button>
-
     <div class="hero-content">
       <p class="hero-kicker">WE'RE GETTING MARRIED</p>
       <h1>Joel <span>&</span> Libina</h1>
@@ -40,7 +37,11 @@
       </div>
     </div>
 
-    <a class="scroll-indicator" href="#couple" aria-label="Scroll to couple section">⌄</a>
+    <div class="hero-bottom-controls" aria-label="Hero photo controls">
+      <button class="hero-arrow" type="button" id="heroPrev" aria-label="Previous photo">‹</button>
+      <a class="scroll-indicator" href="#couple" aria-label="Scroll to couple section">⌄</a>
+      <button class="hero-arrow" type="button" id="heroNext" aria-label="Next photo">›</button>
+    </div>
   </header>
 
   <main>
@@ -254,31 +255,41 @@
     <div class="modal-backdrop" data-close-rsvp></div>
     <div class="modal-card" role="dialog" aria-modal="true" aria-labelledby="rsvpTitle">
       <button class="modal-close" type="button" data-close-rsvp aria-label="Close">×</button>
-      <p class="eyebrow rose">3 JANUARY 2027</p>
-      <h2 id="rsvpTitle">RSVP</h2>
-      <form id="rsvpForm">
-        <label>
-          Your name
-          <input type="text" id="rsvpName" maxlength="80" required placeholder="Your name">
-        </label>
-        <label>
-          Will you be attending?
-          <select id="rsvpAttendance" required>
-            <option value="">Select an option</option>
-            <option value="yes">Yes, I’ll be there</option>
-            <option value="no">Sorry, I can’t make it</option>
-          </select>
-        </label>
-        <label>
-          Number attending
-          <input type="number" id="rsvpGuestCount" min="0" max="10" value="1" required>
-        </label>
-        <label>
-          Message or note <span class="optional-text">(optional)</span>
-          <textarea id="rsvpMessage" maxlength="500" rows="4" placeholder="Anything you'd like us to know"></textarea>
-        </label>
-        <button class="secondary-button full-width" type="submit" id="rsvpSubmit">Submit RSVP</button>
-      </form>
+      <div id="rsvpFormView">
+        <p class="eyebrow rose">3 JANUARY 2027</p>
+        <h2 id="rsvpTitle">RSVP</h2>
+        <form id="rsvpForm">
+          <label>
+            Your name
+            <input type="text" id="rsvpName" maxlength="80" required placeholder="Your name">
+          </label>
+          <label>
+            Will you be attending?
+            <select id="rsvpAttendance" required>
+              <option value="">Select an option</option>
+              <option value="yes">Yes, I’ll be there</option>
+              <option value="no">Sorry, I can’t make it</option>
+            </select>
+          </label>
+          <label>
+            Number attending
+            <input type="number" id="rsvpGuestCount" min="0" max="10" value="1" required>
+          </label>
+          <label>
+            Message or note <span class="optional-text">(optional)</span>
+            <textarea id="rsvpMessage" maxlength="500" rows="4" placeholder="Anything you'd like us to know"></textarea>
+          </label>
+          <button class="secondary-button full-width" type="submit" id="rsvpSubmit">Submit RSVP</button>
+        </form>
+      </div>
+
+      <div class="rsvp-success" id="rsvpSuccess" hidden>
+        <div class="rsvp-success-heart" aria-hidden="true">♥</div>
+        <p class="eyebrow rose">RSVP RECEIVED</p>
+        <h2>Thank You!</h2>
+        <p id="rsvpSuccessMessage">Your RSVP has been received.</p>
+        <button class="secondary-button full-width" type="button" id="rsvpDone">Done</button>
+      </div>
     </div>
   </div>
 

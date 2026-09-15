@@ -11,9 +11,7 @@
   <link rel="stylesheet" href="style.css" />
 </head>
 <body class="invitation-page">
-  <audio id="weddingAudio" loop preload="auto">
-  <source src="assets/music/wedding-music.mp3" type="audio/mpeg">
-</audio>
+  <audio id="weddingAudio" src="assets/music/wedding-music.mp3" preload="auto" loop></audio>
 
   <header class="hero" id="home">
     <div class="hero-slides" aria-hidden="true">
@@ -154,6 +152,20 @@
       </div>
 
       <button class="calendar-button" type="button" id="addCalendar">＋ ADD EVENTS TO CALENDAR</button>
+    </section>
+
+    <section class="highlights-section" id="highlights">
+      <div class="section-heading compact-heading">
+        <p class="eyebrow rose">OUR VIDEOS</p>
+        <h2>Our Highlights</h2>
+      </div>
+
+      <div class="video-card">
+        <video class="highlight-video" controls playsinline preload="metadata">
+          <source src="assets/videos/wedding-highlights.mp4" type="video/mp4">
+          Your browser does not support HTML5 video.
+        </video>
+      </div>
     </section>
 
     <section class="actions-section" id="actions">

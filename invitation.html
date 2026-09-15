@@ -81,13 +81,20 @@
         </p>
         <p>
           On June 4, we finally met in person. After months of talking, being together made everything feel even more real.
-          That evening, we talked, laughed, and realized how easy it felt to simply be ourselves around each other.
         </p>
-        <p>
-          Long distance brought plenty of miles and time apart, but every visit gave us another memory and another reason
-          to look forward to the next one. Then on September 6, 2026, came the moment that changed everything — the proposal.
-          She said yes, and the next chapter of our story began.
-        </p>
+
+        <div class="story-more" id="storyMore" hidden>
+          <p>
+            That evening, we talked, laughed, and realized how easy it felt to simply be ourselves around each other.
+          </p>
+          <p>
+            Long distance brought plenty of miles and time apart, but every visit gave us another memory and another reason
+            to look forward to the next one. Then on September 6, 2026, came the moment that changed everything — the proposal.
+            She said yes, and the next chapter of our story began.
+          </p>
+        </div>
+
+        <button class="story-read-more" type="button" id="storyReadMore" aria-expanded="false" aria-controls="storyMore">Read More</button>
       </article>
     </section>
 
@@ -107,7 +114,7 @@
             Kavungumpazaya, Puramattom,<br>
             Kerala, India
           </p>
-          <a class="location-button" href="https://www.google.com/maps/search/?api=1&query=St.%20Thomas%20Marthoma%20Church%20Auditorium%20Kavungumpazaya%20Puramattom%20Kerala%20India" target="_blank" rel="noopener noreferrer">VIEW LOCATION</a>
+          <a class="location-button" href="https://www.google.com/maps/place/St.+Thomas+Marthoma+Church,+Kavungumprayar/@9.3947287,76.6546238,17z/data=!3m1!4b1!4m6!3m5!1s0x3b063b43f0538349:0x31ac1e2afd8a3daf!8m2!3d9.3947287!4d76.6572041!16s%2Fg%2F1yg6d446z?entry=ttu&amp;g_ep=EgoyMDI2MDgwNS4xIKXMDSoASAFQAw%3D%3D" target="_blank" rel="noopener noreferrer">VIEW LOCATION</a>
         </article>
 
         <article class="event-card-main">
@@ -118,7 +125,7 @@
             Mar Lazarus Orthodox Valiyapally<br>
             Pathanapuram, Kerala, India
           </p>
-          <a class="location-button" href="https://www.google.com/maps/search/?api=1&query=Mar%20Lazarus%20Orthodox%20Valiyapally%20Pathanapuram%20Kerala%20India" target="_blank" rel="noopener noreferrer">VIEW LOCATION</a>
+          <a class="location-button" href="https://www.google.com/maps/place/Mar+Lazarus+Orthodox+Valiyapally/@9.0977894,76.8513028,17z/data=!3m1!4b1!4m6!3m5!1s0x3b0672e94f188b1f:0x8c8735cf6f14fd15!8m2!3d9.0977894!4d76.8538777!16s%2Fg%2F1tdkf1wg?entry=ttu&amp;g_ep=EgoyMDI2MDYxMC4wIKXMDSoASAFQAw%3D%3D" target="_blank" rel="noopener noreferrer">VIEW LOCATION</a>
         </article>
 
         <article class="event-card-main">
@@ -129,7 +136,7 @@
             Morning Star Convention Center<br>
             Elamanoor, Kerala, India
           </p>
-          <a class="location-button" href="https://www.google.com/maps/search/?api=1&query=Morning%20Star%20Convention%20Center%20Elamanoor%20Kerala%20India" target="_blank" rel="noopener noreferrer">VIEW LOCATION</a>
+          <a class="location-button" href="https://www.google.com/maps/place/Morning+Star+Convention+Center,+Elamanoor/@34.2028252,-93.0388842,7z/data=!4m6!3m5!1s0x3b0612a3592bf1c3:0xaee73cf59d8015a6!8m2!3d9.1338875!4d76.8086252!16s%2Fg%2F11cnddn0tt?entry=ttu&amp;g_ep=EgoyMDI2MDYxMC4wIKXMDSoASAFQAw%3D%3D" target="_blank" rel="noopener noreferrer">VIEW LOCATION</a>
         </article>
       </div>
     </section>
@@ -188,6 +195,21 @@
       </div>
     </section>
   </main>
+
+  <div class="modal" id="invitationCardModal" aria-hidden="true">
+    <div class="modal-backdrop" data-close-invitation></div>
+    <div class="invitation-image-modal" role="dialog" aria-modal="true" aria-label="Wedding invitation card">
+      <button class="modal-close invitation-modal-close" type="button" aria-label="Close invitation" data-close-invitation>×</button>
+      <div class="invitation-image-wrap">
+        <img src="assets/images/invitation-card.jpg" alt="Joel and Libina wedding invitation card" id="invitationCardImage">
+        <div class="invitation-image-placeholder" id="invitationCardPlaceholder">
+          <p class="eyebrow rose">INVITATION CARD</p>
+          <h2>Joel &amp; Libina</h2>
+          <p>Upload your invitation image as <strong>assets/images/invitation-card.jpg</strong>.</p>
+        </div>
+      </div>
+    </div>
+  </div>
 
   <div class="modal" id="greetingsModal" aria-hidden="true">
     <div class="modal-backdrop" data-close-modal></div>

@@ -37,7 +37,6 @@ const weddingDate =
   new Date("2027-01-03T11:00:00+05:30").getTime();
 
 function updateCountdown() {
-
   const daysEl =
     document.getElementById("days");
 
@@ -59,15 +58,12 @@ function updateCountdown() {
     return;
   }
 
-
   let distance =
     weddingDate - Date.now();
-
 
   if (distance < 0) {
     distance = 0;
   }
-
 
   const days =
     Math.floor(
@@ -89,7 +85,6 @@ function updateCountdown() {
       (distance / 1000) % 60
     );
 
-
   daysEl.textContent =
     days;
 
@@ -102,7 +97,6 @@ function updateCountdown() {
   secondsEl.textContent =
     String(seconds).padStart(2, "0");
 }
-
 
 updateCountdown();
 
@@ -133,10 +127,10 @@ const heroNext =
   );
 
 let heroIndex = 0;
-let heroTimer;
+let heroTimer = null;
 
 
-// Load every image from data-src
+// Load images from data-src
 heroSlides.forEach(
   (slide) => {
 
@@ -147,10 +141,8 @@ heroSlides.forEach(
       return;
     }
 
-
     const preloader =
       new Image();
-
 
     preloader.onload =
       () => {
@@ -159,7 +151,6 @@ heroSlides.forEach(
           `url("${src}")`;
 
       };
-
 
     preloader.onerror =
       () => {
@@ -174,7 +165,6 @@ heroSlides.forEach(
 
       };
 
-
     preloader.src =
       src;
 
@@ -182,12 +172,13 @@ heroSlides.forEach(
 );
 
 
-function showHeroSlide(index) {
+function showHeroSlide(
+  index
+) {
 
   if (!heroSlides.length) {
     return;
   }
-
 
   heroIndex =
     (
@@ -195,7 +186,6 @@ function showHeroSlide(index) {
       heroSlides.length
     ) %
     heroSlides.length;
-
 
   heroSlides.forEach(
     (
@@ -234,10 +224,11 @@ function previousHeroSlide() {
 
 function resetHeroTimer() {
 
-  clearInterval(
-    heroTimer
-  );
-
+  if (heroTimer) {
+    clearInterval(
+      heroTimer
+    );
+  }
 
   heroTimer =
     setInterval(
@@ -248,11 +239,11 @@ function resetHeroTimer() {
 }
 
 
-// Force first image active
+// First image
 showHeroSlide(0);
 
 
-// Previous button
+// Previous arrow
 heroPrev?.addEventListener(
   "click",
   () => {
@@ -265,7 +256,7 @@ heroPrev?.addEventListener(
 );
 
 
-// Next button
+// Next arrow
 heroNext?.addEventListener(
   "click",
   () => {
@@ -278,8 +269,10 @@ heroNext?.addEventListener(
 );
 
 
-// Start automatic slideshow
-resetHeroTimer();
+// Start slideshow
+if (heroSlides.length > 1) {
+  resetHeroTimer();
+}
 
 
 // ======================================================
@@ -296,6 +289,15 @@ const musicToggle =
     "musicToggle"
   );
 
+const musicPreferenceKey =
+  "joel-libina-music-preference";
+
+const musicTimeKey =
+  "joel-libina-music-time";
+
+let lastMusicSaveSecond =
+  -1;
+
 
 function setMusicButton(
   isPlaying
@@ -305,12 +307,10 @@ function setMusicButton(
     return;
   }
 
-
   musicToggle.textContent =
     isPlaying
       ? "❚❚"
       : "♪";
-
 
   musicToggle.setAttribute(
     "aria-label",
@@ -319,11 +319,104 @@ function setMusicButton(
       : "Play wedding music"
   );
 
-
   musicToggle.classList.toggle(
     "playing",
     isPlaying
   );
+
+}
+
+
+function saveMusicState(
+  preference
+) {
+
+  if (!weddingAudio) {
+    return;
+  }
+
+  try {
+
+    localStorage.setItem(
+      musicPreferenceKey,
+      preference
+    );
+
+    if (
+      Number.isFinite(
+        weddingAudio.currentTime
+      )
+    ) {
+
+      localStorage.setItem(
+        musicTimeKey,
+        String(
+          weddingAudio.currentTime
+        )
+      );
+
+    }
+
+  } catch (
+    error
+  ) {
+
+    console.warn(
+      "Could not save music state:",
+      error
+    );
+
+  }
+
+}
+
+
+function restoreMusicTime() {
+
+  if (!weddingAudio) {
+    return;
+  }
+
+  try {
+
+    const savedTime =
+      Number(
+        localStorage.getItem(
+          musicTimeKey
+        )
+      );
+
+    if (
+      Number.isFinite(
+        savedTime
+      ) &&
+      savedTime > 0 &&
+      Number.isFinite(
+        weddingAudio.duration
+      )
+    ) {
+
+      weddingAudio.currentTime =
+        Math.min(
+          savedTime,
+          Math.max(
+            weddingAudio.duration - 1,
+            0
+          )
+        );
+
+    }
+
+  } catch (
+    error
+  ) {
+
+    console.warn(
+      "Could not restore music position:",
+      error
+    );
+
+  }
 
 }
 
@@ -334,6 +427,33 @@ async function tryPlayMusic() {
     return;
   }
 
+  let preference =
+    null;
+
+  try {
+
+    preference =
+      localStorage.getItem(
+        musicPreferenceKey
+      );
+
+  } catch {
+    preference = null;
+  }
+
+  // If guest previously paused it, respect that.
+  if (
+    preference ===
+    "paused"
+  ) {
+
+    setMusicButton(
+      false
+    );
+
+    return;
+
+  }
 
   try {
 
@@ -343,10 +463,13 @@ async function tryPlayMusic() {
       true
     );
 
+    saveMusicState(
+      "playing"
+    );
+
   } catch {
 
-    // Most mobile browsers block autoplay.
-    // The music button remains available.
+    // Normal on many mobile browsers.
     setMusicButton(
       false
     );
@@ -356,7 +479,15 @@ async function tryPlayMusic() {
 }
 
 
-// Try autoplay
+weddingAudio?.addEventListener(
+  "loadedmetadata",
+  restoreMusicTime,
+  {
+    once: true
+  }
+);
+
+
 window.addEventListener(
   "load",
   tryPlayMusic,
@@ -366,7 +497,6 @@ window.addEventListener(
 );
 
 
-// Play / pause
 musicToggle?.addEventListener(
   "click",
   async () => {
@@ -374,7 +504,6 @@ musicToggle?.addEventListener(
     if (!weddingAudio) {
       return;
     }
-
 
     if (
       weddingAudio.paused
@@ -386,6 +515,10 @@ musicToggle?.addEventListener(
 
         setMusicButton(
           true
+        );
+
+        saveMusicState(
+          "playing"
         );
 
       } catch (
@@ -409,6 +542,10 @@ musicToggle?.addEventListener(
 
       setMusicButton(
         false
+      );
+
+      saveMusicState(
+        "paused"
       );
 
     }
@@ -441,8 +578,57 @@ weddingAudio?.addEventListener(
 );
 
 
+// Save playback position every ~5 seconds
+weddingAudio?.addEventListener(
+  "timeupdate",
+  () => {
+
+    const currentSecond =
+      Math.floor(
+        weddingAudio.currentTime
+      );
+
+    if (
+      currentSecond !==
+        lastMusicSaveSecond &&
+      currentSecond % 5 === 0
+    ) {
+
+      lastMusicSaveSecond =
+        currentSecond;
+
+      saveMusicState(
+        weddingAudio.paused
+          ? "paused"
+          : "playing"
+      );
+
+    }
+
+  }
+);
+
+
+window.addEventListener(
+  "pagehide",
+  () => {
+
+    if (!weddingAudio) {
+      return;
+    }
+
+    saveMusicState(
+      weddingAudio.paused
+        ? "paused"
+        : "playing"
+    );
+
+  }
+);
+
+
 // ======================================================
-// OUR STORY - READ MORE
+// OUR STORY
 // ======================================================
 
 const storyReadMore =
@@ -464,12 +650,10 @@ storyReadMore?.addEventListener(
       return;
     }
 
-
     const isOpen =
       storyReadMore.getAttribute(
         "aria-expanded"
       ) === "true";
-
 
     storyReadMore.setAttribute(
       "aria-expanded",
@@ -478,10 +662,8 @@ storyReadMore?.addEventListener(
       )
     );
 
-
     storyMore.hidden =
       isOpen;
-
 
     storyReadMore.textContent =
       isOpen
@@ -510,20 +692,16 @@ function showToast(
     return;
   }
 
-
   toast.textContent =
     message;
-
 
   toast.classList.add(
     "show"
   );
 
-
   clearTimeout(
     showToast.timer
   );
-
 
   showToast.timer =
     setTimeout(
@@ -552,17 +730,14 @@ function openModal(
     return;
   }
 
-
   modal.classList.add(
     "open"
   );
-
 
   modal.setAttribute(
     "aria-hidden",
     "false"
   );
-
 
   document.body.classList.add(
     "modal-open"
@@ -579,17 +754,14 @@ function closeModal(
     return;
   }
 
-
   modal.classList.remove(
     "open"
   );
-
 
   modal.setAttribute(
     "aria-hidden",
     "true"
   );
-
 
   if (
     !document.querySelector(
@@ -637,7 +809,6 @@ if (
       invitationCardImage.style.display =
         "block";
 
-
       if (
         invitationCardPlaceholder
       ) {
@@ -657,7 +828,6 @@ if (
 
       invitationCardImage.style.display =
         "none";
-
 
       if (
         invitationCardPlaceholder
@@ -679,7 +849,9 @@ document
     "[data-close-invitation]"
   )
   .forEach(
-    (element) => {
+    (
+      element
+    ) => {
 
       element.addEventListener(
         "click",
@@ -734,10 +906,8 @@ function renderGreetingDocs(
     return;
   }
 
-
   guestMessages.innerHTML =
     "";
-
 
   if (!docs.length) {
 
@@ -748,13 +918,13 @@ function renderGreetingDocs(
 
   }
 
-
   docs.forEach(
-    (docSnap) => {
+    (
+      docSnap
+    ) => {
 
       const item =
         docSnap.data();
-
 
       const card =
         document.createElement(
@@ -783,11 +953,40 @@ function renderGreetingDocs(
         `— ${item.name || "Guest"}`;
 
 
+      const meta =
+        document.createElement(
+          "div"
+        );
+
+      meta.className =
+        "greeting-meta";
+
+
+      const timestamp =
+        item.createdAt?.toDate?.();
+
+
+      meta.textContent =
+        timestamp
+          ? timestamp.toLocaleDateString(
+              undefined,
+              {
+                month:
+                  "short",
+                day:
+                  "numeric",
+                year:
+                  "numeric"
+              }
+            )
+          : "Just now";
+
+
       card.append(
         message,
-        name
+        name,
+        meta
       );
-
 
       guestMessages.appendChild(
         card
@@ -841,7 +1040,6 @@ if (
           error
         );
 
-
         guestMessages.innerHTML =
           '<p class="empty-greetings">Greetings are temporarily unavailable.</p>';
 
@@ -870,7 +1068,6 @@ openGreetings?.addEventListener(
       greetingsModal
     );
 
-
     setTimeout(
       () => {
 
@@ -893,7 +1090,9 @@ document
     "[data-close-modal]"
   )
   .forEach(
-    (element) => {
+    (
+      element
+    ) => {
 
       element.addEventListener(
         "click",
@@ -1069,13 +1268,57 @@ const rsvpSubmit =
     "rsvpSubmit"
   );
 
+const rsvpFormView =
+  document.getElementById(
+    "rsvpFormView"
+  );
+
+const rsvpSuccess =
+  document.getElementById(
+    "rsvpSuccess"
+  );
+
+const rsvpSuccessMessage =
+  document.getElementById(
+    "rsvpSuccessMessage"
+  );
+
+const rsvpDone =
+  document.getElementById(
+    "rsvpDone"
+  );
+
+
+function resetRsvpView() {
+
+  if (
+    rsvpFormView
+  ) {
+
+    rsvpFormView.hidden =
+      false;
+
+  }
+
+  if (
+    rsvpSuccess
+  ) {
+
+    rsvpSuccess.hidden =
+      true;
+
+  }
+
+}
+
 
 function openRsvpModal() {
+
+  resetRsvpView();
 
   openModal(
     rsvpModal
   );
-
 
   setTimeout(
     () => {
@@ -1098,7 +1341,9 @@ document
     "[data-close-rsvp]"
   )
   .forEach(
-    (element) => {
+    (
+      element
+    ) => {
 
       element.addEventListener(
         "click",
@@ -1108,11 +1353,33 @@ document
             rsvpModal
           );
 
+          setTimeout(
+            resetRsvpView,
+            200
+          );
+
         }
       );
 
     }
   );
+
+
+rsvpDone?.addEventListener(
+  "click",
+  () => {
+
+    closeModal(
+      rsvpModal
+    );
+
+    setTimeout(
+      resetRsvpView,
+      200
+    );
+
+  }
+);
 
 
 rsvpAttendance?.addEventListener(
@@ -1125,36 +1392,22 @@ rsvpAttendance?.addEventListener(
       return;
     }
 
-
     const attending =
       rsvpAttendance.value ===
       "yes";
 
-
-    if (
+    rsvpGuestCount.value =
       attending
-    ) {
+        ? Math.max(
+            1,
+            Number(
+              rsvpGuestCount.value
+            ) || 1
+          )
+        : 0;
 
-      rsvpGuestCount.disabled =
-        false;
-
-      rsvpGuestCount.value =
-        Math.max(
-          1,
-          Number(
-            rsvpGuestCount.value
-          ) || 1
-        );
-
-    } else {
-
-      rsvpGuestCount.value =
-        0;
-
-      rsvpGuestCount.disabled =
-        true;
-
-    }
+    rsvpGuestCount.disabled =
+      !attending;
 
   }
 );
@@ -1183,18 +1436,16 @@ rsvpForm?.addEventListener(
     const name =
       rsvpNameInput?.value.trim();
 
-
     const attendance =
       rsvpAttendance?.value;
 
-
     const guestCount =
-      attendance === "yes"
+      attendance ===
+      "yes"
         ? Number(
             rsvpGuestCount?.value
           )
         : 0;
-
 
     const message =
       rsvpMessageInput?.value.trim() ||
@@ -1251,6 +1502,11 @@ rsvpForm?.addEventListener(
       );
 
 
+      const attending =
+        attendance ===
+        "yes";
+
+
       rsvpForm.reset();
 
 
@@ -1267,14 +1523,36 @@ rsvpForm?.addEventListener(
       }
 
 
-      closeModal(
-        rsvpModal
-      );
+      if (
+        rsvpSuccessMessage
+      ) {
+
+        rsvpSuccessMessage.textContent =
+          attending
+            ? `Thank you, ${name}. We can’t wait to celebrate with you!`
+            : `Thank you, ${name}. We’ll miss you and appreciate you letting us know.`;
+
+      }
 
 
-      showToast(
-        "Thank you — your RSVP was received."
-      );
+      if (
+        rsvpFormView
+      ) {
+
+        rsvpFormView.hidden =
+          true;
+
+      }
+
+
+      if (
+        rsvpSuccess
+      ) {
+
+        rsvpSuccess.hidden =
+          false;
+
+      }
 
     } catch (
       error
@@ -1311,7 +1589,7 @@ rsvpForm?.addEventListener(
 
 
 // ======================================================
-// ACTION BUTTONS
+// ACTION TILES
 // ======================================================
 
 document
@@ -1353,7 +1631,6 @@ document
             openModal(
               greetingsModal
             );
-
 
             setTimeout(
               () => {
@@ -1441,8 +1718,11 @@ const galleryNext =
 let availableGalleryImages =
   [];
 
-let galleryIndex = 0;
-let touchStartX = 0;
+let galleryIndex =
+  0;
+
+let touchStartX =
+  0;
 
 
 function refreshGalleryImages() {
@@ -1483,7 +1763,9 @@ function showGalleryImage(
     !availableGalleryImages.length ||
     !lightboxImage
   ) {
+
     return;
+
   }
 
 
@@ -1504,7 +1786,6 @@ function showGalleryImage(
   lightboxImage.src =
     source.src;
 
-
   lightboxImage.alt =
     source.alt;
 
@@ -1521,6 +1802,98 @@ function showGalleryImage(
 }
 
 
+// Animate gallery items
+if (
+  "IntersectionObserver" in
+  window
+) {
+
+  const galleryObserver =
+    new IntersectionObserver(
+      (
+        entries,
+        observer
+      ) => {
+
+        entries.forEach(
+          (
+            entry
+          ) => {
+
+            if (
+              !entry.isIntersecting
+            ) {
+              return;
+            }
+
+            const item =
+              entry.target;
+
+            const index =
+              galleryItems.indexOf(
+                item
+              );
+
+
+            window.setTimeout(
+              () => {
+
+                item.classList.add(
+                  "gallery-visible"
+                );
+
+              },
+              Math.max(
+                index,
+                0
+              ) * 70
+            );
+
+
+            observer.unobserve(
+              item
+            );
+
+          }
+        );
+
+      },
+      {
+        threshold:
+          0.12
+      }
+    );
+
+
+  galleryItems.forEach(
+    (
+      item
+    ) => {
+
+      galleryObserver.observe(
+        item
+      );
+
+    }
+  );
+
+} else {
+
+  galleryItems.forEach(
+    (
+      item
+    ) => {
+
+      item.classList.add(
+        "gallery-visible"
+      );
+
+    }
+  );
+
+}
+
+
 galleryItems.forEach(
   (
     item
@@ -1530,7 +1903,6 @@ galleryItems.forEach(
       item.querySelector(
         "img"
       );
-
 
     if (!img) {
       return;
@@ -1573,11 +1945,9 @@ galleryItems.forEach(
         img.style.display =
           "none";
 
-
         item.classList.remove(
           "has-image"
         );
-
 
         refreshGalleryImages();
 
@@ -1709,21 +2079,11 @@ lightboxImage?.addEventListener(
     }
 
 
-    if (
+    showGalleryImage(
       delta > 0
-    ) {
-
-      showGalleryImage(
-        galleryIndex - 1
-      );
-
-    } else {
-
-      showGalleryImage(
-        galleryIndex + 1
-      );
-
-    }
+        ? galleryIndex - 1
+        : galleryIndex + 1
+    );
 
   },
   {
@@ -1752,6 +2112,7 @@ CALSCALE:GREGORIAN
 METHOD:PUBLISH
 BEGIN:VEVENT
 UID:engagement-20261231@joel-libina-wedding
+DTSTAMP:20260915T120000Z
 DTSTART:20261231T060000Z
 DTEND:20261231T080000Z
 SUMMARY:Joel & Libina - Engagement
@@ -1759,6 +2120,7 @@ LOCATION:St. Thomas Marthoma Church Auditorium, Kavungumprayar, Puramattom, Kera
 END:VEVENT
 BEGIN:VEVENT
 UID:wedding-20270103@joel-libina-wedding
+DTSTAMP:20260915T120000Z
 DTSTART:20270103T053000Z
 DTEND:20270103T073000Z
 SUMMARY:Joel & Libina - Wedding Ceremony
@@ -1766,6 +2128,7 @@ LOCATION:Mar Lazarus Orthodox Valiyapally, Pathanapuram, Kerala, India
 END:VEVENT
 BEGIN:VEVENT
 UID:reception-20270103@joel-libina-wedding
+DTSTAMP:20260915T120000Z
 DTSTART:20270103T093000Z
 DTEND:20270103T123000Z
 SUMMARY:Joel & Libina - Wedding Reception
@@ -1803,7 +2166,6 @@ END:VCALENDAR`;
 
   link.href =
     url;
-
 
   link.download =
     "joel-libina-wedding-events.ics";

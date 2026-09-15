@@ -37,17 +37,10 @@ const weddingDate =
   new Date("2027-01-03T11:00:00+05:30").getTime();
 
 function updateCountdown() {
-  const daysEl =
-    document.getElementById("days");
-
-  const hoursEl =
-    document.getElementById("hours");
-
-  const minutesEl =
-    document.getElementById("minutes");
-
-  const secondsEl =
-    document.getElementById("seconds");
+  const daysEl = document.getElementById("days");
+  const hoursEl = document.getElementById("hours");
+  const minutesEl = document.getElementById("minutes");
+  const secondsEl = document.getElementById("seconds");
 
   if (
     !daysEl ||
@@ -205,20 +198,16 @@ function showHeroSlide(
 
 
 function nextHeroSlide() {
-
   showHeroSlide(
     heroIndex + 1
   );
-
 }
 
 
 function previousHeroSlide() {
-
   showHeroSlide(
     heroIndex - 1
   );
-
 }
 
 
@@ -239,11 +228,9 @@ function resetHeroTimer() {
 }
 
 
-// First image
 showHeroSlide(0);
 
 
-// Previous arrow
 heroPrev?.addEventListener(
   "click",
   () => {
@@ -256,7 +243,6 @@ heroPrev?.addEventListener(
 );
 
 
-// Next arrow
 heroNext?.addEventListener(
   "click",
   () => {
@@ -269,7 +255,6 @@ heroNext?.addEventListener(
 );
 
 
-// Start slideshow
 if (heroSlides.length > 1) {
   resetHeroTimer();
 }
@@ -441,7 +426,6 @@ async function tryPlayMusic() {
     preference = null;
   }
 
-  // If guest previously paused it, respect that.
   if (
     preference ===
     "paused"
@@ -469,7 +453,6 @@ async function tryPlayMusic() {
 
   } catch {
 
-    // Normal on many mobile browsers.
     setMusicButton(
       false
     );
@@ -578,7 +561,6 @@ weddingAudio?.addEventListener(
 );
 
 
-// Save playback position every ~5 seconds
 weddingAudio?.addEventListener(
   "timeupdate",
   () => {
@@ -624,6 +606,84 @@ window.addEventListener(
     );
 
   }
+);
+
+
+// ======================================================
+// PAUSE BACKGROUND MUSIC WHILE HIGHLIGHTS VIDEO PLAYS
+// ======================================================
+
+const highlightsVideo =
+  document.getElementById(
+    "highlightsVideo"
+  );
+
+let musicWasPlayingBeforeVideo =
+  false;
+
+
+highlightsVideo?.addEventListener(
+  "play",
+  () => {
+
+    if (!weddingAudio) {
+      return;
+    }
+
+    musicWasPlayingBeforeVideo =
+      !weddingAudio.paused;
+
+    if (
+      musicWasPlayingBeforeVideo
+    ) {
+
+      weddingAudio.pause();
+
+    }
+
+  }
+);
+
+
+async function resumeMusicAfterVideo() {
+
+  if (
+    !weddingAudio ||
+    !musicWasPlayingBeforeVideo
+  ) {
+    return;
+  }
+
+  try {
+
+    await weddingAudio.play();
+
+  } catch (
+    error
+  ) {
+
+    console.log(
+      "Music resume blocked:",
+      error
+    );
+
+  }
+
+  musicWasPlayingBeforeVideo =
+    false;
+
+}
+
+
+highlightsVideo?.addEventListener(
+  "pause",
+  resumeMusicAfterVideo
+);
+
+
+highlightsVideo?.addEventListener(
+  "ended",
+  resumeMusicAfterVideo
 );
 
 
@@ -1589,7 +1649,7 @@ rsvpForm?.addEventListener(
 
 
 // ======================================================
-// ACTION TILES
+// ACTION BUTTONS
 // ======================================================
 
 document
@@ -1802,7 +1862,7 @@ function showGalleryImage(
 }
 
 
-// Animate gallery items
+// Gallery scroll animation
 if (
   "IntersectionObserver" in
   window

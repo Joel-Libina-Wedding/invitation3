@@ -15,6 +15,7 @@ function updateCountdown() {
   const seconds = Math.floor((distance / 1000) % 60);
 
   daysEl.textContent = days;
+
   document.getElementById('hours').textContent =
     String(hours).padStart(2, '0');
 
@@ -26,6 +27,7 @@ function updateCountdown() {
 }
 
 updateCountdown();
+
 setInterval(updateCountdown, 1000);
 
 
@@ -39,7 +41,8 @@ if (musicToggle) {
   musicToggle.addEventListener('click', () => {
     muted = !muted;
 
-    musicToggle.textContent = muted ? '♪̸' : '♪';
+    musicToggle.textContent =
+      muted ? '♪̸' : '♪';
 
     musicToggle.setAttribute(
       'aria-label',
@@ -49,36 +52,170 @@ if (musicToggle) {
 }
 
 
-// GALLERY
-// If a gallery photo does not exist yet,
-// it will hide instead of showing a broken image icon.
+// OUR STORY READ MORE
 
-document.querySelectorAll('.gallery-item img').forEach((img) => {
+const storyReadMore =
+  document.getElementById('storyReadMore');
 
-  img.addEventListener('load', () => {
-    img.closest('.gallery-item')?.classList.add('has-image');
-  });
+const storyMore =
+  document.getElementById('storyMore');
 
-  img.addEventListener('error', () => {
-    img.style.display = 'none';
-  });
+storyReadMore?.addEventListener('click', () => {
+
+  const isOpen =
+    storyReadMore.getAttribute('aria-expanded') === 'true';
+
+  storyReadMore.setAttribute(
+    'aria-expanded',
+    String(!isOpen)
+  );
+
+  storyMore.hidden = isOpen;
+
+  storyReadMore.textContent =
+    isOpen ? 'Read More' : 'Read Less';
 
 });
 
 
-// GREETINGS / BLESSINGS
+// GALLERY
+// Missing gallery images will be hidden instead
+// of showing a broken image icon.
 
-const modal = document.getElementById('greetingsModal');
+document
+  .querySelectorAll('.gallery-item img')
+  .forEach((img) => {
 
-const greetingForm = document.getElementById('greetingForm');
+    img.addEventListener('load', () => {
 
-const guestMessages = document.getElementById('guestMessages');
+      img
+        .closest('.gallery-item')
+        ?.classList.add('has-image');
 
-const openGreetings = document.getElementById('openGreetings');
+    });
 
-const toast = document.getElementById('toast');
+    img.addEventListener('error', () => {
 
-const storageKey = 'joel-libina-wedding-greetings';
+      img.style.display = 'none';
+
+    });
+
+  });
+
+
+// INVITATION CARD POPUP
+
+const invitationModal =
+  document.getElementById('invitationCardModal');
+
+const invitationCardImage =
+  document.getElementById('invitationCardImage');
+
+const invitationCardPlaceholder =
+  document.getElementById('invitationCardPlaceholder');
+
+
+if (invitationCardImage) {
+
+  invitationCardImage.addEventListener('load', () => {
+
+    invitationCardImage.style.display =
+      'block';
+
+    if (invitationCardPlaceholder) {
+
+      invitationCardPlaceholder.style.display =
+        'none';
+
+    }
+
+  });
+
+
+  invitationCardImage.addEventListener('error', () => {
+
+    invitationCardImage.style.display =
+      'none';
+
+    if (invitationCardPlaceholder) {
+
+      invitationCardPlaceholder.style.display =
+        'flex';
+
+    }
+
+  });
+
+}
+
+
+function openInvitationModal() {
+
+  if (!invitationModal) return;
+
+  invitationModal.classList.add('open');
+
+  invitationModal.setAttribute(
+    'aria-hidden',
+    'false'
+  );
+
+  document.body.classList.add(
+    'modal-open'
+  );
+
+}
+
+
+function closeInvitationModal() {
+
+  if (!invitationModal) return;
+
+  invitationModal.classList.remove('open');
+
+  invitationModal.setAttribute(
+    'aria-hidden',
+    'true'
+  );
+
+  document.body.classList.remove(
+    'modal-open'
+  );
+
+}
+
+
+document
+  .querySelectorAll('[data-close-invitation]')
+  .forEach((el) => {
+
+    el.addEventListener(
+      'click',
+      closeInvitationModal
+    );
+
+  });
+
+
+// GREETINGS
+
+const modal =
+  document.getElementById('greetingsModal');
+
+const greetingForm =
+  document.getElementById('greetingForm');
+
+const guestMessages =
+  document.getElementById('guestMessages');
+
+const openGreetings =
+  document.getElementById('openGreetings');
+
+const toast =
+  document.getElementById('toast');
+
+const storageKey =
+  'joel-libina-wedding-greetings';
 
 
 function openGreetingModal() {
@@ -87,12 +224,21 @@ function openGreetingModal() {
 
   modal.classList.add('open');
 
-  modal.setAttribute('aria-hidden', 'false');
+  modal.setAttribute(
+    'aria-hidden',
+    'false'
+  );
 
-  document.body.classList.add('modal-open');
+  document.body.classList.add(
+    'modal-open'
+  );
 
   setTimeout(() => {
-    document.getElementById('guestName')?.focus();
+
+    document
+      .getElementById('guestName')
+      ?.focus();
+
   }, 50);
 
 }
@@ -104,9 +250,14 @@ function closeGreetingModal() {
 
   modal.classList.remove('open');
 
-  modal.setAttribute('aria-hidden', 'true');
+  modal.setAttribute(
+    'aria-hidden',
+    'true'
+  );
 
-  document.body.classList.remove('modal-open');
+  document.body.classList.remove(
+    'modal-open'
+  );
 
 }
 
@@ -115,20 +266,26 @@ function showToast(message) {
 
   if (!toast) return;
 
-  toast.textContent = message;
+  toast.textContent =
+    message;
 
   toast.classList.add('show');
 
-  clearTimeout(showToast.timer);
+  clearTimeout(
+    showToast.timer
+  );
 
-  showToast.timer = setTimeout(() => {
-    toast.classList.remove('show');
-  }, 2600);
+  showToast.timer =
+    setTimeout(() => {
+
+      toast.classList.remove('show');
+
+    }, 2600);
 
 }
 
 
-// GET SAVED GREETINGS
+// LOAD SAVED GREETINGS
 
 function getGreetings() {
 
@@ -159,15 +316,17 @@ function saveGreetings(items) {
 }
 
 
-// SHOW GREETINGS
+// DISPLAY GREETINGS
 
 function renderGreetings() {
 
   if (!guestMessages) return;
 
-  const items = getGreetings();
+  const items =
+    getGreetings();
 
-  guestMessages.innerHTML = '';
+  guestMessages.innerHTML =
+    '';
 
   if (!items.length) {
 
@@ -211,14 +370,16 @@ function renderGreetings() {
       );
 
 
-      guestMessages.appendChild(card);
+      guestMessages.appendChild(
+        card
+      );
 
     });
 
 }
 
 
-// OPEN GREETINGS BUTTON
+// OPEN GREETINGS
 
 openGreetings?.addEventListener(
   'click',
@@ -226,7 +387,7 @@ openGreetings?.addEventListener(
 );
 
 
-// CLOSE MODAL
+// CLOSE GREETINGS MODAL
 
 document
   .querySelectorAll('[data-close-modal]')
@@ -240,7 +401,7 @@ document
   });
 
 
-// ESCAPE KEY CLOSES MODAL
+// ESCAPE KEY CLOSES POPUPS
 
 document.addEventListener(
   'keydown',
@@ -249,6 +410,8 @@ document.addEventListener(
     if (event.key === 'Escape') {
 
       closeGreetingModal();
+
+      closeInvitationModal();
 
     }
 
@@ -358,15 +521,14 @@ document
 
         if (action === 'invitation') {
 
-          window.location.href =
-            'index.html';
+          openInvitationModal();
 
           return;
 
         }
 
 
-        // LIVE STREAM
+        // LIVE STREAMING
 
         if (action === 'livestream') {
 

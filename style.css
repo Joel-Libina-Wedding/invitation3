@@ -873,3 +873,76 @@ body.modal-open { overflow: hidden; }
   .hero { min-height: 92vh; }
   .hero-slide { background-position: center 14%; }
 }
+
+/* Wedding ceremony blessing */
+.wedding-blessing {
+  margin: -6px auto 22px;
+  max-width: 430px;
+  font-size: 14px;
+  line-height: 1.65;
+  color: #6f5260;
+}
+
+.wedding-blessing em {
+  font-family: 'Cormorant Garamond', serif;
+  font-size: 17px;
+}
+
+.wedding-blessing strong {
+  display: inline-block;
+  margin-top: 3px;
+  color: #4a3040;
+  font-weight: 600;
+}
+
+/* Floating music control */
+.floating-music {
+  position: fixed;
+  right: 22px;
+  bottom: 22px;
+  width: 54px;
+  height: 54px;
+  border: 1px solid rgba(255,255,255,.55);
+  border-radius: 50%;
+  background: rgba(46, 36, 70, .90);
+  color: #fff;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font: 600 21px/1 'Montserrat', sans-serif;
+  cursor: pointer;
+  z-index: 90;
+  box-shadow: 0 8px 24px rgba(34,25,48,.24);
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+  transition: transform .2s ease, background .2s ease, box-shadow .2s ease;
+}
+
+.floating-music:hover {
+  transform: scale(1.07);
+  background: rgba(46,36,70,.98);
+}
+
+.floating-music.playing {
+  box-shadow: 0 0 0 5px rgba(193,134,157,.18), 0 8px 24px rgba(34,25,48,.25);
+  font-size: 14px;
+}
+
+@media (max-width: 600px) {
+  .floating-music {
+    width: 48px;
+    height: 48px;
+    right: 16px;
+    bottom: calc(16px + env(safe-area-inset-bottom));
+    font-size: 18px;
+  }
+
+  .floating-music.playing {
+    font-size: 12px;
+  }
+
+  .wedding-blessing {
+    font-size: 13px;
+    margin-bottom: 20px;
+  }
+}
